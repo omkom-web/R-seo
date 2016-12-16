@@ -1,0 +1,8 @@
+name: shiny_web_app
+title:
+account: omkom-web
+server: shinyapps.io
+appId: 145719
+bundleId: 652512
+url: https://omkom-web.shinyapps.io/shiny_web_app/
+when: 1481896242.67665
