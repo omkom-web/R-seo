@@ -7,14 +7,21 @@
 #    http://shiny.rstudio.com/
 #
 library(googleAuthR)
+#library(searchConsoleR)
 library(shiny)
 library(shinydashboard)
 
-options(shiny.port = 5572)
+#scr_auth()
+#source('functions.R')
+
+options(shiny.port = 1221)
+
+
 options("googleAuthR.scopes.selected" = c("https://www.googleapis.com/auth/webmasters",
                                           "https://www.googleapis.com/auth/analytics"
                                           )
       )
+#service_token <- gar_auth_service(json_file="~/__DEV/R-seo/secret_google.json")
 
 shorten_url <- function(url){
   body = list( longUrl = url )
@@ -28,11 +35,14 @@ shorten_url <- function(url){
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   
-  ## Create access token and render login button
-  access_token <- callModule(googleAuth, "loginButton")
+  message("New Shiny Session - ", Sys.time())
   
   ## Create access token and render login button
-  #access_token <- callModule(googleAuth, "loginButton", approval_prompt = "force")
+  access_token <- callModule( googleAuth, "login", login_text = "S'indentifier", logout_text = "Se déconnecter")
+  #ga_accounts <- reactive({
+  #  validate( need( access_token(), "Authenticate") )
+  #  with_shiny( google_analytics_account_list, shiny_access_token = access_token() )
+  #})
   
   #short_url_output <- eventReactive(input$submit, {
     ## wrap existing function with_shiny

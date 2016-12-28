@@ -15,7 +15,7 @@ slidebar <- dashboardSidebar(
   tags$head(tags$style(HTML('.shiny-server-account { display: none; }'))),
   
   # The dynamically-generated user panel
-  uiOutput("userpanel"),
+  #uiOutput("userpanel"),
   
   sidebarMenu(
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
