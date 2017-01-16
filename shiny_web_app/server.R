@@ -7,21 +7,20 @@
 #    http://shiny.rstudio.com/
 #
 library(googleAuthR)
-#library(searchConsoleR)
+library(searchConsoleR)
 library(shiny)
 library(shinydashboard)
 
+source('global.R')
+
+options("googleAuthR.scopes.selected" = getOption("searchConsoleR.scope") )
+options("googleAuthR.client_id" = getOption("searchConsoleR.client_id"))
+options("googleAuthR.client_secret" = getOption("searchConsoleR.client_secret"))
+options("googleAuthR.webapp.client_id" = getOption("searchConsoleR.webapp.client_id"))
+options("googleAuthR.webapp.client_secret" = getOption("searchConsoleR.webapp.client_secret"))
+
 #scr_auth()
 #source('functions.R')
-
-options(shiny.port = 1221)
-
-
-options("googleAuthR.scopes.selected" = c("https://www.googleapis.com/auth/webmasters",
-                                          "https://www.googleapis.com/auth/analytics"
-                                          )
-      )
-#service_token <- gar_auth_service(json_file="~/__DEV/R-seo/secret_google.json")
 
 shorten_url <- function(url){
   body = list( longUrl = url )
@@ -33,17 +32,29 @@ shorten_url <- function(url){
 }
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
   message("New Shiny Session - ", Sys.time())
   
   ## Create access token and render login button
-  access_token <- callModule( googleAuth, "login", login_text = "S'indentifier", logout_text = "Se déconnecter")
-  #ga_accounts <- reactive({
-  #  validate( need( access_token(), "Authenticate") )
-  #  with_shiny( google_analytics_account_list, shiny_access_token = access_token() )
-  #})
+  access_token <- callModule( googleAuth, "loginButton", login_text = "S'indentifier", logout_text = "Se déconnecter")
+  #access_token <- googleAuthR::reactiveAccessToken(session)
+  #output$loginButton <- googleAuthR::renderLogin(session, access_token())
   
+  website_df <- reactive({
+    validate( need( access_token(), "Authenticate") )
+    with_shiny( list_websites, shiny_access_token = access_token() )
+  })
+  
+  observe({
+    www <- website_df()
+    urls <- www[www$permissionLevel != "siteUnverifiedUser",'siteUrl']
+    updateSelectInput(session,
+                      "website_select",
+                      choices = urls)
+  })
+  
+
   #short_url_output <- eventReactive(input$submit, {
     ## wrap existing function with_shiny
     ## pass the reactive token in shiny_access_token
@@ -55,11 +66,21 @@ shinyServer(function(input, output) {
   
   output$userpanel <- renderUI({
     # session$user is non-NULL only in authenticated sessions
-    if (!is.null(session$user)) {
+    #if (!is.null(session$user)) {
       sidebarUserPanel(
         span("Logged in as ", session$user),
         subtitle = a(icon("sign-out"), "Logout", href="__logout__"))
+    #}
+  })
+  
+  output$selected_url <- renderText({
+    www <- input$website_select
+    if(!is.null(access_token())){
+      s <- www  
+    } else {
+      s <- "Authenticate to see data."
     }
+    s
   })
   
 })

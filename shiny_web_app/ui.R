@@ -9,14 +9,24 @@
 library(googleAuthR)
 library(shiny)
 library(shinydashboard)
+source('profile.R')
 
 slidebar <- dashboardSidebar(
   # Custom CSS to hide the default logout panel
   tags$head(tags$style(HTML('.shiny-server-account { display: none; }'))),
   
   # The dynamically-generated user panel
-  #uiOutput("userpanel"),
+  #iOutput("userpanel"),
+  uiOutput("profile_nav"),
+  uiOutput("profile"),
   
+  #googleAuthUI("loginButton"),
+  googleAuthR::googleAuthUI("loginButton"),
+  selectInput("website_select", label = "Select Website",
+              choices = NULL),
+  
+  actionButton("submit", "Get Search Console Data"),
+  #INFOS : meta <- googleAnalyticsR::meta,
   sidebarMenu(
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
     menuItem("Tools", tabName = "tools", icon = icon("th"))
@@ -24,14 +34,18 @@ slidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+  textOutput("debug"),
+  textOutput("selected_url", container = h2),
   fluidRow(
-    box(googleAuthUI("loginButton")),
+    box( 
+        
+    ),
     box()
   ),
   tabItems(
     tabItem(tabName = "dashboard",
             fluidRow(
-              box(),
+              box( ),
               box()
             )
     ),
